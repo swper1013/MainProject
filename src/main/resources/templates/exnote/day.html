@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<style>
+
+</style>
+<head>
+    <meta charset="UTF-8">
+    <!-- jQuery 추가 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JavaScript 추가 -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!--달력-->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+    <title>Title</title>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth'
+            });
+            calendar.render();
+        });
+
+    </script>
+
+</head>
+<style>
+</style>
+<body>
+
+<th:block th:replace="~{/layout/basic :: setContent(~{this::content})}">
+    <th:block th:fragment="content">
+        <div class="row mt-5 main">
+            <div class="row shadow cal">
+                <div id='calendar'></div>
+            </div>
+        <div class="col shadow">
+
+        <form th:action="@{/exnote/register}" th:method="post">
+            <div class="form-group">
+                <label>내용</label>
+                <input type="text" class="form-control" name="content" placeholder="내용을 입력해">
+            </div>
+            <div class="form-group">
+                <label>마감 날짜</label>
+                <input type="date" class="form-control" name="lastDate"><br>
+            </div>
+            <button type="submit" class="btn btn-primary">저장!</button><br><br>
+        </form>
+        </div>
+        <!--리스트 구현-->
+        <div  class="col shadow liston">
+        <table class="table table-striped">
+            <thead>
+            <form th:action="@{/exnote/day}" method="get">
+                <!-- 정렬 버튼 -->
+                <button type="submit" name="sortBy" value="daysLeftAsc" class="btn btn-link">남은 일자순 ▼</button>
+                <button type="submit" name="sortBy" value="daysLeftDesc" class="btn btn-link">남은 일자순 ▲</button>
+            </form>
+            <tr>
+                <th scope="col">번호</th>
+                <th scope="col">내용</th>
+                <th scope="col">등록 일자</th>
+                <th scope="col" >마감 일자</th>
+                <th scope="col">남은 일자</th>
+            </tr>
+            </thead>
+            <tbody id="noteList" style= "height:100px;  overflow: auto;">
+         <!--   <tr th:if="${result != null and result.dtoList != null and !result.dtoList.isEmpty()}"
+                th:each="exNote, status : ${result.dtoList}" >
+                <th th:text="${status.index + 1}">1</th>
+                <td th:text="${exNote.content}"></td>
+                <td th:text="${exNote.regDate}"></td>
+                <td th:text="${exNote.lastDate}"></td>
+                <td class="days-left"></td>
+                <td><button class="btn btn-danger delete-btn" th:data-id="${exNote.num}">삭제</button></td>
+            </tr>
+            <tr th:if="${result == null or result.dtoList == null or result.dtoList.isEmpty()}">
+                <td colspan="3" class="text-center">일정이 없습니다.</td>
+            </tr>
+            -->
+            <div id="loadingMessage" style="text-align: center; display: none;">
+                <p>데이터를 불러오고 있습니다</p>
+            </div>
+            </tbody>
+        </table>
+        </div>
+
+        </div>
+    </th:block>
+</th:block>
+<script th:inline="javascript">
+
+    <!--남은 일자 계산-->
+    $(document).ready(function() {
+        let page = 0;
+        let isLoading = false;
+
+        // 페이지가 로드될 때 첫 데이터 로드
+        loadMore();
+
+        // 스크롤 이벤트
+        $(window).scroll(function() {
+            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                loadMore();  // 스크롤 끝에 도달하면 데이터 로드
+            }
+        });
+
+
+        // 데이터 불러오기 함수
+        function loadMore() {
+            if (isLoading) return;  // 이미 로딩 중이면 아무 작업도 하지 않음
+            isLoading = true;
+            $('#loadingMessage').show();
+
+            $.ajax({
+                url: '/exnote/day/api',
+                data: { page: page, size: 14 },
+                type: 'GET',
+                success: function(data) {
+                    $('#loadingMessage').hide();
+                    isLoading = false;
+
+                    if (data.dtoList && data.dtoList.length > 0) {
+                        data.dtoList.forEach(function(exNote) {
+                            var lastDate = new Date(exNote.lastDate);
+                            var today = new Date();
+                            var lastMto = lastDate - today;
+                            var daysLeft = Math.ceil(lastMto / (1000 * 3600 * 24));
+                            // 로드한 데이터 추가
+                            $('#noteList').append(
+                                `<tr>
+                                    <td>${exNote.num}</td>
+                                    <td>${exNote.content}</td>
+                                    <td>${exNote.regDate}</td>
+                                    <td>${exNote.lastDate}</td>
+                                    <td class="days-left">${daysLeft + "일"}</td>
+                                    <td><button class="btn btn-danger delete-btn" th:data-id="${exNote.num}">삭제</button></td>
+                                </tr>`
+                            );
+
+                        });
+                        page++;  // 페이지 증가
+                    } else {
+                        $('#loadingMessage').html('<p>더 이상 데이터가 없습니다.</p>');
+                    }
+                },
+                error: function() {
+                    $('#loadingMessage').hide();
+                    isLoading = false;
+                    alert("오류가 발생하였습니다. 데이터를 가져올 수 없습니다.");
+                }
+            });
+
+        }
+        $(document).on('click', '.delete-btn', function() {
+            var noteId = $(this).data('id');
+            console.log("noteId"+noteId);
+            var row = $(this).closest('tr');
+
+            if (confirm("정말 삭제하시겠습니까?")) {
+                $.ajax({
+                    url: '/exnote/delete/' + noteId,
+                    type: 'DELETE',
+                    success: function (response) {
+                        alert(response);  // 성공 메시지 표시
+                        row.remove();  // 삭제된 항목 삭제
+                    },
+
+                    error: function () {
+                        alert("삭제 실패");
+                    }
+
+                });
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

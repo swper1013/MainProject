@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- jQuery 추가 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Bootstrap JavaScript 추가 -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <title>Title</title>
+</head>
+<body>
+<th:block th:replace="~{/layout/basic :: setContent(~{this::content})}">
+  <th:block th:fragment="content">
+      <button onclick="ex01Fn()">ajax연습 1번 호출</button>
+      <button onclick="ex02Fn()">ex02 함수 호출</button>
+      <button onclick="ex03Fn()">ex03 함수 호출</button>
+      <button onclick="ex04Fn()">ex04 함수 호출</button>
+      <button onclick="ex05Fn()">ex05 함수 호출</button>
+      <button onclick="ex06Fn()">ex06 함수 호출</button>
+      <button onclick="ex07Fn()">ex07 함수 호출</button>
+      <hr>
+
+  </th:block>
+</th:block>
+<script th:inline="javascript">
+  const ex01Fn = () =>{
+    $.ajax({
+      type:"get",
+      url:"/ex01",
+      success: function (res){
+        console.log("성공적,,",res)
+      },
+      error: function (err){
+        console.log("실패,,",err)
+      }
+    })
+  }
+  const ex02Fn = () => {
+    $.ajax({
+
+      type: "post",
+      url: "/ex02",
+      // 요청이 성공했을 때 실행되는 부분
+      success: function (res) {
+        console.log("성공", res)
+      },
+      // 요청이 실패했을 때 실행되는 부분
+      error: function (err) {
+        console.log("실패", err);
+      },
+    })
+  }
+  const ex03Fn = () => {
+    const val1 = "Hello SpringBoot!!"
+    $.ajax({
+      // 요청방식: get
+      // 요청주소: /ex03
+      type: "get",
+      url: "/ex03",
+      // parameter 전달하기
+      data: {
+        "param1": val1,
+        "param2": "안녕"
+      },
+      // 요청이 성공했을 때 실행되는 부분
+      success: function (res) {
+        console.log("성공", res)
+      },
+      // 요청이 실패했을 때 실행되는 부분
+      error: function (err) {
+        console.log("실패", err);
+      },
+    })
+  }
+  const ex04Fn = () =>{
+    const val1 = "안ㄴ움ㄴ애ㅑㅜ맨루ㅑㄴㅁㄴ"
+    const params ={
+      "param1" : val1,
+      "param2" : "asdasdasdasdasd"
+    }
+    $.ajax({
+      type : "post",
+      url : "/ex04",
+      data: params,
+      success : function (res){
+        console.log("성공하였스",res)
+      },
+      error : function (err){
+        console.log("실패하였스,,",err)
+      }
+
+    })
+  }
+  const ex05Fn = () => {
+      const val1 = "Hello SpringBoot!!"
+
+      const params = {
+          "param1": val1,
+          "param2": "안녕"
+      }
+
+      $.ajax({
+          // 요청방식: get
+          // 요청주소: /ex05
+          type: "get",
+          url: "/ex05",
+          // parameter 전달하기
+          data: params,
+          // 요청이 성공했을 때 실행되는 부분
+          success: function (res) {
+              console.log("성공", res)
+          },
+          // 요청이 실패했을 때 실행되는 부분
+          error: function (err) {
+              console.log("실패", err);
+          },
+      })
+  }
+  const ex06Fn = () => {
+      const val1 = "Hello SpringBoot!!"
+
+      const params = {
+          "param1": val1,
+          "param2": "안녕"
+      }
+
+      $.ajax({
+          // 요청방식: post
+          // 요청주소: /ex06
+          type: "post",
+          url: "/ex06",
+          // parameter 전달하기
+          data: params,
+          // 요청이 성공했을 때 실행되는 부분
+          success: function (res) {
+              console.log("성공", res)
+          },
+          // 요청이 실패했을 때 실행되는 부분
+          error: function (err) {
+              console.log("실패", err);
+          },
+      })
+  }
+  const ex07Fn = () => {
+      const val1 = "Hello SpringBoot!!"
+
+      const params = {
+          "param1": val1,
+          "param2": "안녕"
+      }
+
+      $.ajax({
+          // 요청방식: post
+          // 요청주소: /ex07
+          type: "post",
+          url: "/ex07",
+          // parameter 전달하기
+          data: JSON.stringify(params),
+          contentType: "application/json",
+          // 요청이 성공했을 때 실행되는 부분
+          success: function (res) {
+              console.log("성공", res)
+              console.log("param1", res.param1);
+          },
+          // 요청이 실패했을 때 실행되는 부분
+          error: function (err) {
+              console.log("실패", err);
+          },
+      })
+  }
+</script>
+
+</body>
+</html>
